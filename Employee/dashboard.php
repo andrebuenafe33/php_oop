@@ -1,8 +1,8 @@
 <?php
-
 session_start();
 include_once '../Database/Dbconnection.php';
 include_once '../users.php';
+require_once '../Controller/DashboardController.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'employer') {
     header("Location: ../login.php");
@@ -10,16 +10,19 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'employer') {
 }
 
 
-$userName = $_SESSION['user']['name'] ?? 'Employee';
+$userName = $_SESSION['user']['name'] ?? 'Employer';
 
-$profilePath = $_SESSION['user']['profile_picture'] ?? 'uploads/default.png';
+// Set variables BEFORE including the header
+$profilePath = $_SESSION['user']['profile_picture'] ?? '';
 
-// Check if file exists relative to current file location
-if (!empty($profilePath) && file_exists(__DIR__ . '/../' . $profilePath)) {
-    $userImg = '../' . $profilePath;
+if (empty($profilePath) || !file_exists('../' . $profilePath)) {
+    $userImg = '../uploads/default.jpg';
 } else {
-    $userImg = '../uploads/default.png';
+    $userImg = '../' . ltrim($profilePath, '/');
 }
+
+$dashboardController = new DashboardController();
+$dashboardData = $dashboardController->getDashboardData();
 
 ?>
 <!DOCTYPE html>
@@ -113,9 +116,11 @@ if (!empty($profilePath) && file_exists(__DIR__ . '/../' . $profilePath)) {
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?= $userName ?></span>
-                                <img src="<?= htmlspecialchars($userImg) ?>" width="40" height="40" style="border-radius: 50%;" alt="Profile" />
-
-
+                             <img src="<?= htmlspecialchars($userImg) . '?' . time() ?>"
+                                alt="Profile"
+                                class="img-profile rounded-circle"
+                                width="40" height="40"
+                                onerror="this.onerror=null;this.src='../uploads/default.jpg';">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -147,22 +152,7 @@ if (!empty($profilePath) && file_exists(__DIR__ . '/../' . $profilePath)) {
     <!-- Content Row -->
     <div class="row">
 
-        <!-- Total Users Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Users</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">154</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-users fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
         <!-- Total Jobs Card -->
         <div class="col-xl-3 col-md-6 mb-4">
@@ -171,7 +161,7 @@ if (!empty($profilePath) && file_exists(__DIR__ . '/../' . $profilePath)) {
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Jobs Posted</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">89</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $dashboardData['job_count'] ?></div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-briefcase fa-2x text-gray-300"></i>

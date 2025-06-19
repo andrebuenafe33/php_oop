@@ -1,6 +1,24 @@
 <?php
-
+session_start();
 include_once '../Database/Dbconnection.php';
+include_once '../users.php';
+
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'employer') {
+    header("Location: ../login.php");
+    exit();
+}
+
+
+$userName = $_SESSION['user']['name'] ?? 'Employer';
+
+// Set variables BEFORE including the header
+$profilePath = $_SESSION['user']['profile_picture'] ?? '';
+
+if (empty($profilePath) || !file_exists('../' . $profilePath)) {
+    $userImg = '../uploads/default.jpg';
+} else {
+    $userImg = '../' . ltrim($profilePath, '/');
+}
 
 $conn = (new DbConnection())->getConnection();
 
@@ -115,9 +133,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"></span>
-                                <img class="img-profile rounded-circle"
-                                    src="img/undraw_profile.svg">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?= $userName ?></span>
+                             <img src="<?= htmlspecialchars($userImg) . '?' . time() ?>"
+                                alt="Profile"
+                                class="img-profile rounded-circle"
+                                width="40" height="40"
+                                onerror="this.onerror=null;this.src='../uploads/default.jpg';">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"

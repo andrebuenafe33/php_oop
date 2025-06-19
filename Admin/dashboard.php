@@ -1,8 +1,8 @@
 <?php
-
 session_start();
 include_once '../Database/Dbconnection.php';
 include_once '../users.php';
+require_once '../Controller/DashboardController.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header("Location: ../login.php");
@@ -19,6 +19,9 @@ if (empty($profilePath) || !file_exists('../' . $profilePath)) {
 } else {
     $userImg = '../' . ltrim($profilePath, '/');
 }
+
+$dashboardController = new DashboardController();
+$dashboardData = $dashboardController->getDashboardData();
 
 ?>
 
@@ -170,7 +173,7 @@ if (empty($profilePath) || !file_exists('../' . $profilePath)) {
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Users</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">154</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $dashboardData['user_count'] ?></div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-users fa-2x text-gray-300"></i>
@@ -187,7 +190,7 @@ if (empty($profilePath) || !file_exists('../' . $profilePath)) {
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Jobs Posted</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">89</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $dashboardData['job_count'] ?></div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-briefcase fa-2x text-gray-300"></i>
